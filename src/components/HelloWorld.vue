@@ -5,7 +5,19 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
+// const props = defineProps({
+// size: {
+//   type: String,
+// default: 'grand'
+// },
 
+
+
+
+
+// watch(() => val.value, () => {
+//   emit('changeValue', val.value);
+// })
 let counter = ref(0)
   const user = {
     name:   's'
