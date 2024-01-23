@@ -4,6 +4,7 @@ import RegistrationView from "@/views/RegistrationView.vue";
 import LoginView from "@/views/LoginView.vue";
 import AccountView from "@/views/AccountView.vue";
 import ProductListView from "@/views/ProductListView.vue";
+import BasketView from "@/views/BasketView.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/productList',
     name: 'productList',
     component: ProductListView
+  },
+  {
+    path: '/basket',
+    name: 'basket',
+    component: BasketView
   },
 
   // {

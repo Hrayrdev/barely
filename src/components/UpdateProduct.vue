@@ -48,7 +48,6 @@ onMounted(()=> {
 
 watch(() => props, (currentValue, oldValue) => {
       product.value =  JSON.parse(JSON.stringify(props.dataProduct))
-      console.log('watch')
     },
     { deep: true }
 );

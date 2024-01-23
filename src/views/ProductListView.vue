@@ -1,8 +1,11 @@
 <template>
-  <CreateProduct  @createProduct="createProductFunc"/>
-  <BasketListShow/>
+  <CreateProduct @createProduct="createProductFunc"/>
+  <button type="button" class="btn btn-primary" @click="goToBasket">
+    Корзина
+  </button>
+  <button @click="addScore">addScore</button>
   <div class="d-flex justify-content-center mb-10">
-    <input @input="searchProductsFunc"  v-model="searchProductTitle">
+    <input @input="searchProductsFunc" v-model="searchProductTitle">
   </div>
   <div style="display:flex;justify-content: center">
     <button class="flt-btn" @click="typeFiltration(0)  ">Все</button>
@@ -29,18 +32,22 @@
               Редактировать
             </button>
 
-            <button @click="basketStatusFunc(product); "><div style="width: 30px; "><img class="image-auto"  :src="basketLogo(product)  ?  check : image" alt=""></div></button>
+            <button @click="basketStatusFunc(product); " data-bs-toggle="modal" data-bs-target="#pro">
+              <div style="width: 30px; "><img class="image-auto" :src="basketLogo(product)  ?  check : image" alt="">
+              </div>
+            </button>
           </div>
           <button @click="deleteProductFunc(product)">Удалить</button>
         </div>
 
       </div>
     </div>
+    <UpdateProduct  :dataProduct="propsProduct" @updateProduct="updateProductFunc"/>
 
-    <UpdateProduct :dataProduct="propsProduct" @updateProduct="updateProductFunc"/>
-
+    <BasketListShow :product="basketProduct"  @basketCount="basketShowFunc" />
   </div>
-  <Pagination :propl="propl" :filterProducts="productList" @paginateList="paginateList" :typeFilter="typeFilter" :searchProductTitle="searchProductTitle"/>
+  <Pagination :propl="propl" :filterProducts="productList" @paginateList="paginateList" :typeFilter="typeFilter"
+              :searchProductTitle="searchProductTitle"/>
 </template>
 <script setup>
 import CreateProduct from "@/components/CreateProduct.vue";
@@ -50,11 +57,15 @@ import InputField from "@/components/InputField.vue";
 import Pagination from "@/components/Pagination.vue";
 import image from '../assets/BaskedAddLogo.png'; //file-loader вернет путь к картинке
 import check from '../assets/Check.svg';
-import BasketListShow from "@/components/BasketListShow.vue"; //file-loader вернет путь к картинке
+import BasketListShow from "@/components/BasketListShow.vue";
+import store from "@/store";
+import router from "@/router"; //file-loader вернет путь к картинке
 
 function openUpdateDialog(product) {
   propsProduct.value = product
 }
+
+const basketProduct = ref({name: ''})
 const av = ref(true)
 const propl = ref(0)
 const searchProductTitle = ref('')
@@ -230,7 +241,6 @@ const paginatedList = ref([])
 const basketList = ref([])
 
 
-
 function createProductFunc(newValue) {
   productList.value.push({
     id: newValue.id,
@@ -246,7 +256,7 @@ function createProductFunc(newValue) {
     price: newValue.price,
     photo: newValue.photo,
   })
-  propl.value +=1
+  propl.value += 1
 
 }
 
@@ -257,7 +267,7 @@ function updateProductFunc(updateProduct) {
     if (productList.value[i].id === updateProduct.value.id) {
       productList.value[i] = updateProduct.value
       filterProductList.value[i] = updateProduct.value
-      propl.value +=1
+      propl.value += 1
 
     }
   }
@@ -270,14 +280,12 @@ function deleteProductFunc(product) {
     if (productList.value[i].id === product.id) {
       productList.value.splice(i, 1)
       filterProductList.value.splice(i, 1)
-      propl.value +=1
+      propl.value += 1
       console.log(productList.value)
     }
   }
 
 }
-
-
 
 
 const typeFilter = ref(0)
@@ -286,9 +294,7 @@ const typeFilter = ref(0)
 function searchProductsFunc() {
 
   if (searchProductTitle.value !== '') {
-     productList.value.filter(item => item.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
-
-
+    productList.value.filter(item => item.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
 
 
   }
@@ -296,16 +302,16 @@ function searchProductsFunc() {
 
 
 const filterProducts = computed(() => {
-  if (typeFilter) {
-    if (typeFilter.value === 0) {
-      return paginatedList.value.filter(p => p.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
-    } else {
+      if (typeFilter) {
+        if (typeFilter.value === 0) {
+          return paginatedList.value.filter(p => p.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
+        } else {
 
-      return paginatedList.value.filter(p => p.type === typeFilter.value && p.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
+          return paginatedList.value.filter(p => p.type === typeFilter.value && p.name.toLowerCase().includes(searchProductTitle.value.toLowerCase()))
+        }
+      }
+
     }
-  }
-
-}
 )
 
 function paginateList(list) {
@@ -318,47 +324,63 @@ onMounted(() => {
 
 })
 
+function addScore() {
+  store.commit('increment', 50);
+  console.log(store.state.count)
+}
 function typeFiltration(value) {
   typeFilter.value = value
 }
 
-function basketStatusFunc(product){
-  for (let i = 0; i < productList.value.length; i++){
-    if (productList.value[i] === product) {
+
+function basketLogo(product) {
+  if (product.basketStatus) {
+    return true
+}
+}
+function basketStatusFunc(product) {
+  basketProduct.value = product
+}
+
+function  basketShowFunc(product){
+  // store.commit('increment', 50);
+
+  for (let i = 0; i < productList.value.length; i++) {
+    if (productList.value[i].id === product.id) {
       productList.value[i].basketStatus = !productList.value[i].basketStatus
-      console.log('awdwad')
-      console.log(productList.value[i] , product)
-
-    } else {
-      if(productList.value[i].id === product.id){
-        productList.value[i].basketStatus = !productList.value[i].basketStatus
-
-        console.log(productList.value[i] , product)
-      }
+      product.basketStatus = !product.basketStatus
     }
 
   }
-
-  // console.log(product)
-  // console.log(productList.value)
-  if (product.basketStatus){
-    basketList.value.push(product)
-  } else  {
+  if (product.basketStatus) {
+    store.commit('getBasketList')
+    let s = []
+    s.push(product)
+    store.commit('increment', s);
+  } else {
     for (let i = 0; i < basketList.value.length; i++) {
-      if (basketList.value[i].id === product.id){
+      if (basketList.value[i].id === product.id) {
         basketList.value.splice(i, 1)
 
       }
     }
   }
 
-}
-function basketLogo(product){
-  if (product.basketStatus){
-    return true
-  }
+
+
+  console.log(basketList.value)
+
 
 }
+
+
+
+function goToBasket(){
+  router.push('/basket')
+
+}
+
+
 </script>
 
 <style scoped lang="scss">
@@ -401,7 +423,8 @@ body {
 .mb-10 {
   margin-bottom: 10px;
 }
-.test{
+
+.test {
   background-color: red
 }
 </style>
